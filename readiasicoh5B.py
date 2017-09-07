@@ -4,6 +4,7 @@ import h5py
 import glob
 import sys
 import fileinput
+import datetime
 filename='iasi_CO_LATMOS_ULB_metopb_20131030_v20100815.txt'
 #data= np.loadtxt(filename)
 latmin=14.0
@@ -13,9 +14,10 @@ lonmax=-84
 year=2013
 
 
+to=datetime.datetime.utcfromtimestamp(0.0)
 
 
-fields=[\
+fields=[('tepoch',float),\
 	('lat',float),\
 	('lon',float),\
 	('date',str,8),\
@@ -46,7 +48,7 @@ def readoneiasi(linearr):
 	print linearr
 	one_measurement=np.zeros((1),dtype=iasicotype)[0]
 	icounter=0
-	for name in iasicotype.names:
+	for name in iasicotype.names[1:]:
 		print name
 		nlen=1	
 		try:
@@ -72,8 +74,19 @@ def readoneiasi(linearr):
 			one_measurement[name][:]=subarr[:]
 
 		icounter=icounter+nlen
+	try:
+		one_measurement['tepoch']=(datetime.datetime.strptime(one_measurement['date']+one_measurement['time'],'%Y%m%D%H%M%S')-to).total_seconds()
+	except: 
+		print 'problems'
+		year=int(one_measurement['date'][0:4])
+		month=int(one_measurement['date'][4:6])
+		hour=int(one_measurement['date'][6:8])
+		minute=0
+		second=0
+		one_measurement['tepoch']=(datetime.datetime(year,month,hour,minute,second)-to).total_seconds()
 
 	print one_measurement['lat'],one_measurement['lon']
+	
 	return one_measurement
 
 
@@ -128,6 +141,8 @@ def onefile(filename,h5filename,metop,year,mes):
 	    onemeasurement=readoneiasi(line)
 	    print onemeasurement['lat'],onemeasurement['lon']
 	    addonemeasurement(onemeasurement,fh5,metop,year,mes)
+    zlevels=np.arange(20)
+    fh5.attrs.create('zlevels', zlevels, dtype=zlevels.dtype )
     fh5.close()
 
 
