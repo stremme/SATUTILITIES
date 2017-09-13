@@ -13,7 +13,7 @@ year=2014
 
 
 meses=np.arange(12,dtype=int)+1
-for 	mes in meses[:1]:
+for 	mes in meses:
 	metop='B'
 	datapath='txt/iasi_CO_LATMOS_ULB_metop%s_%i%02i*' % (metop.lower(),year,mes)
 	#datapath='%s-data/iasi_CO_LATMOS_ULB_metop%s_%i%02i*' % (metop,metop.lower(),year,mes)
