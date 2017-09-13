@@ -17,7 +17,7 @@ year=2013
 to=datetime.datetime.utcfromtimestamp(0.0)
 
 
-fields=[('tepoch',float),\
+fields=[('tepoch',int),\
 	('lat',float),\
 	('lon',float),\
 	('date',str,8),\
@@ -38,11 +38,6 @@ iasicotype=np.dtype(fields)
 print iasicotype.names
 data=np.zeros((1),dtype=iasicotype)
 one_measurement=data[0]
-
-print one_measurement['lat'].dtype == 'float'
-print one_measurement['qflag'].dtype == 'int64'
-print one_measurement['time'].dtype == 'str'
-
 
 def readoneiasi(linearr):
 	print linearr
@@ -80,10 +75,17 @@ def readoneiasi(linearr):
 		print 'problems'
 		year=int(one_measurement['date'][0:4])
 		month=int(one_measurement['date'][4:6])
-		hour=int(one_measurement['date'][6:8])
-		minute=0
-		second=0
-		one_measurement['tepoch']=(datetime.datetime(year,month,hour,minute,second)-to).total_seconds()
+		day=int(one_measurement['date'][6:8])
+		hour=int(one_measurement['time'][0:2])
+		minute=int(one_measurement['time'][2:4])
+		second=int(one_measurement['time'][4:6])
+		if second == 60:
+			minute=minute+1
+			second=0
+		if minute == 60:
+			minute=0
+			hour=hour+1
+		one_measurement['tepoch']=(datetime.datetime(year,month,day,hour,minute,second)-to).total_seconds()
 
 	print one_measurement['lat'],one_measurement['lon']
 	
@@ -91,7 +93,7 @@ def readoneiasi(linearr):
 
 
 
-def addonemeasurement(onemeasurement,fh5,metop,year,mes):
+def addonemeasurement(onemeasurement,fh5):
 	print 'addmeasurements'
 	lat=onemeasurement['lat']
 	lon=onemeasurement['lon']
@@ -100,7 +102,7 @@ def addonemeasurement(onemeasurement,fh5,metop,year,mes):
 
 
 	try:
-		dset=fh5['/%s/%i%02i/%iN%iW' % (metop,year,mes,int(lat),int(lon))]
+		dset=fh5['%iN%iW' % (int(lat),int(lon))]
 		#print 'dset exist'
 		#print dset
 		#print dset.shape
@@ -113,7 +115,7 @@ def addonemeasurement(onemeasurement,fh5,metop,year,mes):
 		#print 'exception'
 		datalatlon=[onemeasurement]
 		try:
-			dset=fh5.create_dataset('/%s/%i%02i/%iN%iW' % (metop,year,mes,int(lat),int(lon)),data=datalatlon,maxshape=(None,))
+			dset=fh5.create_dataset('%iN%iW' % (int(lat),int(lon)),data=datalatlon,maxshape=(None,))
 
 			fh5.flush()
 		except:
@@ -140,7 +142,7 @@ def onefile(filename,h5filename,metop,year,mes):
 	    print float(line[0]),float(line[0])
 	    onemeasurement=readoneiasi(line)
 	    print onemeasurement['lat'],onemeasurement['lon']
-	    addonemeasurement(onemeasurement,fh5,metop,year,mes)
+	    addonemeasurement(onemeasurement,fh5)
     zlevels=np.arange(20)
     fh5.attrs.create('zlevels', zlevels, dtype=zlevels.dtype )
     fh5.close()

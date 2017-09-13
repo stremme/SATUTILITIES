@@ -5,12 +5,8 @@ import glob
 import sys
 import fileinput
 import readiasicoh5B
-filename='iasi_CO_LATMOS_ULB_metopb_20131030_v20100815.txt'
-#data= np.loadtxt(filename)
-latmin=14.0
-lonmin=-114
-latmax=35.0
-lonmax=-84
+
+
 year=2014
 
 
