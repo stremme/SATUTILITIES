@@ -7,11 +7,10 @@ import fileinput
 import datetime
 filename='iasi_CO_LATMOS_ULB_metopb_20131030_v20100815.txt'
 #data= np.loadtxt(filename)
-latmin=14.0
-lonmin=-114
-latmax=35.0
-lonmax=-84
-year=2013
+latmin=13.0
+lonmin=-119
+latmax=34.0
+lonmax=-73
 
 
 to=datetime.datetime.utcfromtimestamp(0.0)
@@ -70,7 +69,7 @@ def readoneiasi(linearr):
 
 		icounter=icounter+nlen
 	try:
-		one_measurement['tepoch']=(datetime.datetime.strptime(one_measurement['date']+one_measurement['time'],'%Y%m%D%H%M%S')-to).total_seconds()
+		one_measurement['tepoch']=(datetime.datetime.strptime(one_measurement['date']+one_measurement['time']+" UTC",'%Y%m%D%H%M%S %Z')-to).total_seconds()
 	except: 
 		print 'problems'
 		year=int(one_measurement['date'][0:4])
